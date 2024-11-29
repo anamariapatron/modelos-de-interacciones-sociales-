@@ -62,7 +62,24 @@ class ValueIterationAgent(ValueEstimationAgent):
     def runValueIteration(self):
         # Write value iteration code here
         "*** YOUR CODE HERE ***"
+        for i in range(self.iterations):
+            k_V = util.Counter()
+            for state in self.mdp.getStates():
 
+                A_i = self.mdp.getPossibleActions(state)
+                max_value = float('-inf')
+                for action in A_i:
+                    V_s = self.computeQValueFromValues(state, action)
+
+                    if V_s > max_value:
+                        max_value = V_s
+
+                    k_V[state] = max_value
+
+                #max_action = max(v_ia, key=v_ia.get)
+                #max_value = v_ia[max_action]
+                
+            self.values = k_V
 
     def getValue(self, state):
         """
@@ -77,7 +94,18 @@ class ValueIterationAgent(ValueEstimationAgent):
           value function stored in self.values.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        q_s = 0 
+        states_p = self.mdp.getTransitionStatesAndProbs(state, action)
+
+        for s_p in states_p:
+
+                        # s_p[0] is next state and #s_p[1] is p.
+                        r = self.mdp.getReward(state, action, s_p[0]) 
+                        v_sp = self.values[s_p[0]]
+                        q_s += s_p[1] * (r + self.discount * v_sp)
+    
+        #util.raiseNotDefined()
+        return q_s
 
     def computeActionFromValues(self, state):
         """
@@ -89,7 +117,18 @@ class ValueIterationAgent(ValueEstimationAgent):
           terminal state, you should return None.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        maxA = ""
+        A_i = self.mdp.getPossibleActions(state)
+        max_value = float('-inf')
+        for action in A_i:
+            V_s = self.computeQValueFromValues(state, action)
+            if V_s > max_value:
+                maxA = action
+                max_value = V_s
+
+        #util.raiseNotDefined()           
+        return maxA
+        
 
     def getPolicy(self, state):
         return self.computeActionFromValues(state)
