@@ -69,9 +69,9 @@ class QLearningAgent(ReinforcementAgent):
         legal_actions_state=self.getLegalActions(state)
         if not legal_actions_state:
           return 0.0
+        else:
+          max_value=max(self.getQValue(state, action) for action in legal_actions_state)
         
-        max_value=max(self.getQValue(state, action) for action in legal_actions_state)
-      
         return max_value
         
         
@@ -89,7 +89,8 @@ class QLearningAgent(ReinforcementAgent):
 
         if not legal_actions_state:
           return None
-        max_action=max(legal_actions_state, key=lambda action: self.getQValue(state, action))
+        else:
+          max_action=max(legal_actions_state, key=lambda action: self.getQValue(state, action))
         return max_action
 
     def getAction(self, state):
@@ -134,6 +135,8 @@ class QLearningAgent(ReinforcementAgent):
         
         # Almacenar el nuevo valor Q en el diccionario de Q-values
         self.Qvalues[(state, action)] = update_q_s_a
+
+  
 
     def getPolicy(self, state):
         return self.computeActionFromQValues(state)

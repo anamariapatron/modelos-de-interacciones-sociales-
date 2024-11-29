@@ -14,7 +14,9 @@
 
 # imports from python standard library
 import grading
-import imp
+import importlib.util
+import sys
+#import imp
 import optparse
 import os
 import re
@@ -122,25 +124,54 @@ def setModuleName(module, filename):
 
 #from cStringIO import StringIO
 
-def loadModuleString(moduleSource):
-    # Below broken, imp doesn't believe its being passed a file:
-    #    ValueError: load_module arg#2 should be a file or None
-    #
-    #f = StringIO(moduleCodeDict[k])
-    #tmp = imp.load_module(k, f, k, (".py", "r", imp.PY_SOURCE))
-    tmp = imp.new_module(k)
-    exec(moduleCodeDict[k], tmp.__dict__)
-    setModuleName(tmp, k)
-    return tmp
+# # def loadModuleString(moduleSource):
+#     # Below broken, imp doesn't believe its being passed a file:
+#     #    ValueError: load_module arg#2 should be a file or None
+#     #
+#     #f = StringIO(moduleCodeDict[k])
+#     #tmp = imp.load_module(k, f, k, (".py", "r", imp.PY_SOURCE))
+#     tmp = imp.new_module(k)
+#     exec(moduleCodeDict[k], tmp.__dict__)
+#     setModuleName(tmp, k)
+#     return tmp
 
+#ana
+def loadModuleString(moduleSource, moduleName):
+    # Crear un módulo vacío
+    spec = importlib.util.spec_from_loader(moduleName, loader=None)
+    module = importlib.util.module_from_spec(spec)
+    
+    # Ejecutar el código fuente en el contexto del módulo
+    exec(moduleSource, module.__dict__)
+    
+    # Registrar el módulo en sys.modules
+    sys.modules[moduleName] = module
+    
+    # Devolver el módulo cargado
+    return module
 
 import py_compile
 
 
-def loadModuleFile(moduleName, filePath):
-    with open(filePath, 'r') as f:
-        return imp.load_module(moduleName, f, "%s.py" % moduleName, (".py", "r", imp.PY_SOURCE))
+# def loadModuleFile(moduleName, filePath):
+#     with open(filePath, 'r') as f:
+#         return imp.load_module(moduleName, f, "%s.py" % moduleName, (".py", "r", imp.PY_SOURCE))
 
+def loadModuleFile(moduleName, filePath):
+    # Crear una especificación para el módulo desde el archivo
+    spec = importlib.util.spec_from_file_location(moduleName, filePath)
+    
+    # Crear un módulo vacío a partir de la especificación
+    module = importlib.util.module_from_spec(spec)
+    
+    # Ejecutar el módulo
+    spec.loader.exec_module(module)
+    
+    # Registrar el módulo en sys.modules (opcional, pero útil si se quiere acceder al módulo globalmente)
+    sys.modules[moduleName] = module
+    
+    # Devolver el módulo cargado
+    return module
 
 def readFile(path, root=""):
     "Read file from disk at specified path and return as string"
