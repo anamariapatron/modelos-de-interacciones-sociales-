@@ -43,6 +43,7 @@ class QLearningAgent(ReinforcementAgent):
         ReinforcementAgent.__init__(self, **args)
 
         "*** YOUR CODE HERE ***"
+        self.Qvalues = util.Counter()
 
     def getQValue(self, state, action):
         """
@@ -51,7 +52,11 @@ class QLearningAgent(ReinforcementAgent):
           or the Q node value otherwise
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+       #actions that your agent hasn't seen before still have a Q-value, specifically a Q-value of zero
+        return self.Qvalues[(state,action)]
+        
+    
 
 
     def computeValueFromQValues(self, state):
@@ -61,8 +66,17 @@ class QLearningAgent(ReinforcementAgent):
           there are no legal actions, which is the case at the
           terminal state, you should return a value of 0.0.
         """
+        legal_actions_state=self.getLegalActions(state)
+        if not legal_actions_state:
+          return 0.0
+        
+        max_value=max(self.getQValue(state, action) for action in legal_actions_state)
+      
+        return max_value
+        
+        
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        
 
     def computeActionFromQValues(self, state):
         """
@@ -71,7 +85,12 @@ class QLearningAgent(ReinforcementAgent):
           you should return None.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        legal_actions_state=self.getLegalActions(state)
+
+        if not legal_actions_state:
+          return None
+        max_action=max(legal_actions_state, key=lambda action: self.getQValue(state, action))
+        return max_action
 
     def getAction(self, state):
         """
@@ -102,7 +121,19 @@ class QLearningAgent(ReinforcementAgent):
           it will be called on your behalf
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # Obtener el valor Q actual del par estado-acción
+        q_s_a = self.getQValue(state, action)
+        
+        # Obtener el valor máximo de Q para el siguiente estado (acción futura)
+        next_q_s_a = self.computeValueFromQValues(nextState)
+        difference=reward + (self.discount * next_q_s_a) - q_s_a
+        
+        
+        # Actualizar el valor Q usando la fórmula de Q-learning
+        update_q_s_a = q_s_a + self.alpha * difference
+        
+        # Almacenar el nuevo valor Q en el diccionario de Q-values
+        self.Qvalues[(state, action)] = update_q_s_a
 
     def getPolicy(self, state):
         return self.computeActionFromQValues(state)
